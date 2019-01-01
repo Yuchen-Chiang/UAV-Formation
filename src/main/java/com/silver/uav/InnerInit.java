@@ -24,7 +24,7 @@ public class InnerInit {
 
         try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\Yuche\\IdeaProjects\\UAV-Formation\\src\\main\\resources\\inner_init"))) {
 
-            int n = Constants.N_IN_GROUP;
+            int n = Constants.NUM_IN_GROUP;
             map.put("time", Integer.valueOf(br.readLine()));
             map.put("sample", Integer.valueOf(br.readLine()));
             map.put("leader", generateLeader(br.readLine()));

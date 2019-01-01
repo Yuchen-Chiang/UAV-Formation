@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class InnerSimulation {
 
+    private static double theta = .0;
+
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
 
@@ -14,6 +16,7 @@ public class InnerSimulation {
         int sample = (int) map.get("sample");
         LeaderPlane lp = (LeaderPlane) map.get("leader");
         List<FollowerPlane> fps = (List<FollowerPlane>) map.get("followers");
+        List<FollowerPlane> vps = InnerController.cloneVirtual(fps);
 
         /* ***************  start  *************** */
         for (int i = 0; i < time * sample; i++) {
@@ -22,12 +25,46 @@ public class InnerSimulation {
             /* ***************  leader plane computing  *************** */
             lp.x = lp.x1;
             lp.y = lp.y1;
-            lp.x1 += f*lp.vx;
-            lp.y1 += f*lp.vy;
+            lp.vx = lp.vx1;
+            lp.vy = lp.vy1;
+            double v = 10;
+            if (i < time*sample/10) {
+                theta = 0;
+            } else {
+                theta += Math.PI/3600;
+                if (theta > Math.PI) theta = Math.PI;
+            }
+            lp.x1 += f*v*Math.cos(theta);
+            lp.y1 += f*v*Math.sin(theta);
+            lp.vx1 = v*Math.cos(theta);
+            lp.vy1 = v*Math.sin(theta);
+
+            /* ***************  virtual plane computing  *************** */
+            for (int j = 0; j < Constants.NUM_IN_GROUP; j++) {
+                Plane p = vps.get(j);
+                p.x = p.x1;
+                p.y = p.y1;
+                switch (j) {
+                    case 0 :
+                        p.x1 = lp.x1-Math.cos(theta)*10-Math.sin(theta)*10;
+                        p.y1 = lp.y1-Math.sin(theta)*10+Math.cos(theta)*10;
+                        break;
+                    case 1 :
+                        p.x1 = lp.x1-Math.cos(theta)*10+10*Math.sin(theta);
+                        p.y1 = lp.y1-Math.sin(theta)*10-10*Math.cos(theta);
+                        break;
+                }
+
+            }
+
 
             /* ***************  follower plane computing  *************** */
-            for (FollowerPlane fp : fps) {
-                double[] a = InnerController.computeAcceleration(lp, fp, fps);
+            for (int j = 0; j < Constants.NUM_IN_GROUP; j++) {
+
+                FollowerPlane fp = fps.get(j);
+                FollowerPlane vp = vps.get(j);
+
+                double[] a = InnerController.computeAcceleration(vp, lp, fp, fps);
 
                 fp.x = fp.x1;
                 fp.y = fp.y1;
@@ -46,6 +83,8 @@ public class InnerSimulation {
 
             /* ***************  current plane x,y output  *************** */
             InnerController.printCurrentPlane(i/(double)sample, lp, fps);
+            InnerController.printToText(lp, fps);
+            InnerController.computeXYError(lp, fps);
         }
     }
 }

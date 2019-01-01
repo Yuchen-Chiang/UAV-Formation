@@ -1,6 +1,6 @@
 package com.silver.uav;
 
-abstract class Plane {
+class Plane {
 
     Double x;
     Double y;

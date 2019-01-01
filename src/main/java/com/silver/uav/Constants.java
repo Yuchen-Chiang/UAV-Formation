@@ -2,20 +2,23 @@ package com.silver.uav;
 
 public interface Constants {
 
-    int CA = 1;
-    int CR = 1;
-    int CO = 1;
+    double CA = 180;
+    int CR = 130;
+    double CO = 200;
     int RAI = 10;
-    int EXPECT_R = 30;
-    int COMMUNICATION_D = 100;
-
-    double MI = 1.0;
-    double LI = 1.0;
-
     int MASS = 1;
+    int NUM_IN_GROUP = 2;
 
-    int N_IN_GROUP = 6;
-    int N_OF_GROUP = 10;
+    double SP = 100;                //引领机间期望距离
+    double U = 100;                 //参数
+    double A = .13;                   //幅度参数
+    double DENSITY = 3/(Math.PI*Math.pow(U/2, 2));
 
-    int LEADER_ID = 1;
+    int N_IN_GROUP = 3;
+    int N_OF_GROUP = 13;
+
+    double K_PX = 0.00001;
+    double K_PY = 0.0001;
+    double K_IX = 0.0001;
+    double K_IY = 0.0001;
 }
