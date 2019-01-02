@@ -11,11 +11,12 @@ public interface Constants {
 
     double SP = 100;                //引领机间期望距离
     double U = 100;                 //参数
-    double A = .13;                   //幅度参数
+    double AA = .13;                   //幅度参数
+    double AR = 0.3;
     double DENSITY = 3/(Math.PI*Math.pow(U/2, 2));
 
     int N_IN_GROUP = 3;
-    int N_OF_GROUP = 13;
+    int N_OF_GROUP = 6;
 
     double K_PX = 0.00001;
     double K_PY = 0.0001;

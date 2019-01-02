@@ -20,37 +20,20 @@ public class OuterSimulation {
         List<LeaderPlane> groups = (List<LeaderPlane>) map.get("groups");
 
         /* ***************  compute dt  *************** */
-        List<Point> points = new ArrayList<>();
-
-        for (LeaderPlane lp : groups) {
-            points.add(new Point(lp.x, lp.y));
-        }
-
-        DTNoBigPoints dt = new DTNoBigPoints(points);
-        List<Triangle> tl = dt.triangles;
-
-        List<Set<LeaderPlane>> ls = new ArrayList<>();
-        for (int i = 1; i < Constants.N_OF_GROUP; i++) {
-            LeaderPlane t = groups.get(i);
-            Set<LeaderPlane> set = new HashSet<>();
-            for (int j = 1; j < Constants.N_OF_GROUP; j++) {
-                if (j != i) {
-                    LeaderPlane p = groups.get(j);
-                    if (OuterController.testAndCheck(tl, t, p)) {
-                        set.add(p);
-                    }
-                }
-            }
-            ls.add(set);
-        }
-
-//        for (int i = 1; i < Constants.N_OF_GROUP; i++) {
-//            Set<LeaderPlane> set = ls.get(i-1);
-//            System.out.println("-----------------------");
-//            System.out.println(i);
-//            for (LeaderPlane p : set) System.out.println(p.id);
-//            System.out.println("-----------------------");
+//        List<Point> points = new ArrayList<>();
+//
+//        for (LeaderPlane lp : groups) {
+//            points.add(new Point(lp.x, lp.y));
 //        }
+//
+//        DTNoBigPoints dt = new DTNoBigPoints(points);
+//        List<Triangle> tl = dt.triangles;
+
+        Map<LeaderPlane, Set<LeaderPlane>> memory = new HashMap<>();
+        OuterController.initMemory(memory, groups);
+
+
+
 
         /* ***************  start  *************** */
         for (int i = 0; i < time * sample; i++) {
@@ -60,20 +43,33 @@ public class OuterSimulation {
             LeaderPlane leader = groups.get(0);
             leader.x = leader.x1;
             leader.y = leader.y1;
+            leader.vx = leader.vx1;
+            leader.vy = leader.vy1;
             double v = 10;
-            if (i < time*sample/15) {
+            if (i < 25*sample) {
                 theta = 0;
-            } else {
+            } else if (i >= 25*sample && i < 55*sample){
                 theta += Math.PI/3600;
-                if (theta > Math.PI/6) theta = Math.PI/6;
+            } else if (i >= 55*sample && i < 85*sample) {
+                theta -= Math.PI/3600;
+            } else if (i >= 85*sample && i < 90*sample) {
+                theta = 0;
+            } else if (i >=90*sample && i < 120*sample) {
+                theta -= Math.PI/3600;
+            } else if (i >= 120*sample && i < 150*sample) {
+                theta += Math.PI/3600;
+            } else {
+                theta = 0;
             }
             leader.x1 += f*v*Math.cos(theta);
             leader.y1 += f*v*Math.sin(theta);
+            leader.vx1 = v*Math.cos(theta);
+            leader.vy1 = v*Math.sin(theta);
 
             /* ***************  Outer Group Compute  *************** */
             for (int j = 1; j < Constants.N_OF_GROUP; j++) {
                 LeaderPlane lp = groups.get(j);
-                OuterController.processOuter(lp, tl, f);
+                OuterController.processOuter2(lp, memory.get(lp), f);
             }
 
             /* ***************  current plane x,y output  *************** */

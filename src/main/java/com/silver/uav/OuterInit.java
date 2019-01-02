@@ -18,8 +18,6 @@ import java.util.Map;
  */
 class OuterInit {
 
-    private static int lid = 0;
-
     static Map<String, Object> readText() {
         Map<String, Object> map = new HashMap<>();
 
@@ -43,10 +41,11 @@ class OuterInit {
     private static LeaderPlane generateGroups(String str) {
 
         String[] s = str.split(" ");
-        Double x = Double.valueOf(s[0]);
-        Double y = Double.valueOf(s[1]);
-        Double v = Double.valueOf(s[2]);
-        Double theta = Double.valueOf(s[3]);
-        return new LeaderPlane(x, y, v, theta, .0, lid++);
+        int id = Integer.valueOf(s[0]);
+        Double x = Double.valueOf(s[1]);
+        Double y = Double.valueOf(s[2]);
+        Double vx = Double.valueOf(s[3]);
+        Double vy = Double.valueOf(s[4]);
+        return new LeaderPlane(x, y, vx, vy, .0, id);
     }
 }

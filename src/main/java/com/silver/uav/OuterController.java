@@ -7,9 +7,49 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 class OuterController {
+
+    static void initMemory(Map<LeaderPlane, Set<LeaderPlane>> memory, List<LeaderPlane> groups) {
+        for (int i = 1; i < Constants.N_OF_GROUP; i++) {
+            switch (i) {
+                case 1 :
+                    Set<LeaderPlane> set1 = new HashSet<>();
+                    set1.add(groups.get(0));
+                    set1.add(groups.get(2));
+                    memory.put(groups.get(1), set1);
+                    break;
+                case 2 :
+                    Set<LeaderPlane> set2 = new HashSet<>();
+                    set2.add(groups.get(0));
+                    set2.add(groups.get(1));
+                    memory.put(groups.get(2), set2);
+                    break;
+                case 3 :
+                    Set<LeaderPlane> set3 = new HashSet<>();
+                    set3.add(groups.get(1));
+                    set3.add(groups.get(4));
+                    memory.put(groups.get(3), set3);
+                    break;
+                case 4 :
+                    Set<LeaderPlane> set4 = new HashSet<>();
+                    set4.add(groups.get(3));
+                    set4.add(groups.get(1));
+                    set4.add(groups.get(2));
+                    set4.add(groups.get(5));
+                    memory.put(groups.get(4), set4);
+                    break;
+                case 5 :
+                    Set<LeaderPlane> set5 = new HashSet<>();
+                    set5.add(groups.get(4));
+                    set5.add(groups.get(2));
+                    memory.put(groups.get(5), set5);
+                    break;
+            }
+        }
+    }
 
     static void printDistance(List<LeaderPlane> lps) {
 
@@ -70,22 +110,97 @@ class OuterController {
 
     }
 
-    static void processOuter(LeaderPlane lp, List<Triangle> tl, double f) {
+    static void processOuter2(LeaderPlane lp, Set<LeaderPlane> set, double f) {
+
+        double[] v = {.0, .0};
+
+        double[] vc = {.0, .0};
+        for (LeaderPlane p : set) {
+            double[] tmp = computeVelocityChange(lp, p);
+            vc[0] += tmp[0];
+            vc[1] += tmp[1];
+        }
+
+        double[] vw = {.0, .0};
+        for (LeaderPlane p : set) {
+            if (p.id/10 < lp.id/10) {
+                double[] tmp = computeVelocityWithLeader(p, lp);
+                vw[0] += tmp[0];
+                vw[1] += tmp[1];
+            }
+        }
+
+        double k1 = 0.2;
+        double k2 = .009;
+        v[0] = k1*vc[0] + k2*vw[0];
+        v[1] = k1*vc[1] + k2*vw[1];
+
+        lp.x = lp.x1;
+        lp.y = lp.y1;
+        lp.vx = lp.vx1;
+        lp.vy = lp.vy1;
+
+        lp.x1 += lp.vx*f;
+        lp.y1 += lp.vy*f;
+        lp.vx1 = lp.vx1 + v[0];
+        lp.vy1 = lp.vy1 + v[1];
+    }
+
+    private static double[] computeVelocityChange(LeaderPlane lp, LeaderPlane p) {
+
+        double s = distance(lp, p);
+        double f;
+        double[] v = new double[]{.0,.0};
+        if (s > Constants.SP && s < 2*Constants.SP) {
+            f = Constants.AA*Math.abs(Math.log(1+Constants.U*Math.abs((s-Constants.SP)/Constants.SP))/Math.log(1+Constants.U));
+            double cos = (p.x-lp.x)/s;
+            double sin = (p.y-lp.y)/s;
+            v[0] = f*cos;
+            v[1] = f*sin;
+        } else if (s > 0 && s < Constants.SP){
+            f = Constants.AR*Math.abs(Math.log(1+Constants.U*Math.abs((s-Constants.SP)/Constants.SP))/Math.log(1+Constants.U));
+            double cos = (lp.x-p.x)/s;
+            double sin = (lp.y-p.y)/s;
+            v[0] = f*cos;
+            v[1] = f*sin;
+        }
+
+        return v;
+    }
+
+    private static double[] computeVelocityWithLeader(LeaderPlane lp, LeaderPlane p) {
+
+        double v = velocity(lp, p);
+        if (v < 0.000000001) return new double[]{.0, .0};
+        double cos = (lp.vx-p.vx)/v;
+        double sin = (lp.vy-p.vy)/v;
+        return new double[]{lp.vx-p.vx, lp.vy-p.vy};
+    }
+
+    static void processOuter(LeaderPlane lp, Set<LeaderPlane> set , double f) {
 
         double[] v = {.0, .0};
 
         Set<Point> sp = new HashSet<>();
         Point tp = new Point(lp.x, lp.y);
-        for (Triangle t : tl) {
-            checkAndAdd(t, tp, sp);
-        }
+//        for (Triangle t : tl) {
+//            checkAndAdd(t, tp, sp);
+//        }
 
-        if (checkDensity(tp, sp)) {
-            for (Point p : sp) {
-                double[] tmp = computeExpectedVelocity(tp, p);
-                v[0] += tmp[0];
-                v[1] += tmp[1];
-            }
+//        if (checkDensity(tp, sp)) {
+//            for (LeaderPlane leader : set) {
+//                Point p = new Point(leader.x, leader.y);
+//                double[] tmp = computeExpectedVelocity(tp, p);
+//                v[0] += tmp[0];
+//                v[1] += tmp[1];
+//            }
+//        }
+
+        for (LeaderPlane leader : set) {
+            Point p = new Point(leader.x, leader.y);
+            double[] tmp = computeExpectedVelocity(tp, p);
+            v[0] += tmp[0];
+            v[1] += tmp[1];
         }
 
         double alpha = .5;
@@ -117,21 +232,21 @@ class OuterController {
         double s = distance(tp, p);
         double f;
         double[] v = new double[]{.0,.0};
-//        if (s > 2*Constants.SP && s < 3*Constants.SP) {
-//            f = Constants.A*Math.abs(Math.log(1+Constants.U*Math.abs((s-3*Constants.SP)/Constants.SP))/Math.log(1+Constants.U));
-//            double cos = (p.x()-tp.x())/s;
-//            double sin = (p.y()-tp.y())/s;
-//            v[0] = f*cos;
-//            v[1] = f*sin;
-//        } else
+        if (s > 2*Constants.SP && s < 3*Constants.SP) {
+            f = Constants.AA*Math.abs(Math.log(1+Constants.U*Math.abs((s-3*Constants.SP)/Constants.SP))/Math.log(1+Constants.U));
+            double cos = (p.x()-tp.x())/s;
+            double sin = (p.y()-tp.y())/s;
+            v[0] = f*cos;
+            v[1] = f*sin;
+        } else
         if (s > Constants.SP && s < 2*Constants.SP) {
-            f = Constants.A*Math.abs(Math.log(1+Constants.U*Math.abs((s-Constants.SP)/Constants.SP))/Math.log(1+Constants.U));
+            f = Constants.AA*Math.abs(Math.log(1+Constants.U*Math.abs((s-Constants.SP)/Constants.SP))/Math.log(1+Constants.U));
             double cos = (p.x()-tp.x())/s;
             double sin = (p.y()-tp.y())/s;
             v[0] = f*cos;
             v[1] = f*sin;
         } else if (s > 0 && s < Constants.SP){
-            f = Constants.A*Math.abs(Math.log(1+Constants.U*Math.abs((s-Constants.SP)/Constants.SP))/Math.log(1+Constants.U));
+            f = Constants.AA*Math.abs(Math.log(1+Constants.U*Math.abs((s-Constants.SP)/Constants.SP))/Math.log(1+Constants.U));
             double cos = (tp.x()-p.x())/s;
             double sin = (tp.y()-p.y())/s;
             v[0] = f*cos;
@@ -180,5 +295,9 @@ class OuterController {
 
     private static double distance(Plane p1, Plane p2) {
         return Math.sqrt(Math.pow(p1.x-p2.x, 2)+Math.pow(p1.y-p2.y, 2));
+    }
+
+    private static double velocity(Plane p1, Plane p2) {
+        return Math.sqrt(Math.pow(p1.vx-p2.vx, 2)+Math.pow(p1.vy-p2.vy, 2));
     }
 }
