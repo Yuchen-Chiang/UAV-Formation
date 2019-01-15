@@ -22,4 +22,9 @@ public interface Constants {
     double K_PY = 0.0001;
     double K_IX = 0.0001;
     double K_IY = 0.0001;
+
+    double K_PX_O = 5;
+    double K_PY_O = 0.01;
+    double K_IX_O = 0.05;
+    double K_IY_O = 0.01;
 }

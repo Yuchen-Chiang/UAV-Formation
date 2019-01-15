@@ -18,6 +18,7 @@ public class OuterSimulation {
         int time = (int) map.get("time");
         int sample = (int) map.get("sample");
         List<LeaderPlane> groups = (List<LeaderPlane>) map.get("groups");
+        int timer = 1;
 
         /* ***************  compute dt  *************** */
 //        List<Point> points = new ArrayList<>();
@@ -31,9 +32,6 @@ public class OuterSimulation {
 
         Map<LeaderPlane, Set<LeaderPlane>> memory = new HashMap<>();
         OuterController.initMemory(memory, groups);
-
-
-
 
         /* ***************  start  *************** */
         for (int i = 0; i < time * sample; i++) {
@@ -49,15 +47,15 @@ public class OuterSimulation {
             if (i < 25*sample) {
                 theta = 0;
             } else if (i >= 25*sample && i < 55*sample){
-                theta += Math.PI/3600;
+                theta += Math.PI/(180*sample);
             } else if (i >= 55*sample && i < 85*sample) {
-                theta -= Math.PI/3600;
+                theta -= Math.PI/(180*sample);
             } else if (i >= 85*sample && i < 90*sample) {
                 theta = 0;
             } else if (i >=90*sample && i < 120*sample) {
-                theta -= Math.PI/3600;
+                theta -= Math.PI/(180*sample);
             } else if (i >= 120*sample && i < 150*sample) {
-                theta += Math.PI/3600;
+                theta += Math.PI/(180*sample);
             } else {
                 theta = 0;
             }
@@ -67,9 +65,17 @@ public class OuterSimulation {
             leader.vy1 = v*Math.sin(theta);
 
             /* ***************  Outer Group Compute  *************** */
-            for (int j = 1; j < Constants.N_OF_GROUP; j++) {
-                LeaderPlane lp = groups.get(j);
-                OuterController.processOuter2(lp, memory.get(lp), f);
+            if (timer++ <= 5) {
+                for (int j = 1; j < Constants.N_OF_GROUP; j++) {
+                    LeaderPlane lp = groups.get(j);
+                    OuterController.processOuter2_1(lp, f);
+                }
+            } else {
+                for (int j = 1; j < Constants.N_OF_GROUP; j++) {
+                    LeaderPlane lp = groups.get(j);
+                    OuterController.processOuter2(lp, memory.get(lp), f);
+                }
+                timer = 1;
             }
 
             /* ***************  current plane x,y output  *************** */

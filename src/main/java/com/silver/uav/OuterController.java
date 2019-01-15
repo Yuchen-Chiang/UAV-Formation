@@ -110,6 +110,17 @@ class OuterController {
 
     }
 
+    static void processOuter2_1(LeaderPlane lp, double f) {
+
+        lp.x = lp.x1;
+        lp.y = lp.y1;
+        lp.vx = lp.vx1;
+        lp.vy = lp.vy1;
+
+        lp.x1 += lp.vx*f;
+        lp.y1 += lp.vy*f;
+    }
+
     static void processOuter2(LeaderPlane lp, Set<LeaderPlane> set, double f) {
 
         double[] v = {.0, .0};
