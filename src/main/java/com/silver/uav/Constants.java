@@ -2,9 +2,9 @@ package com.silver.uav;
 
 public interface Constants {
 
-    double CA = 180;
-    int CR = 130;
-    double CO = 200;
+    double CA = 0.15;
+    double CR = 1;
+    double CO = 0.2;
     int RAI = 10;
     int MASS = 1;
     int NUM_IN_GROUP = 2;

@@ -9,7 +9,8 @@ public class InnerController {
 
     private static int LA = 5*Constants.RAI;
     private static int LO = 5*Constants.RAI;
-    private static double LR = Constants.RAI;
+    private static double LR1 = 2*Constants.RAI;
+    private static double LR2 = Constants.RAI;
 
     static void computeXYError(LeaderPlane p0, List<FollowerPlane> fps) {
 
@@ -80,6 +81,48 @@ public class InnerController {
         System.out.println("--------------------------------------");
     }
 
+    static double[] computeAcceleration2(int i, LeaderPlane lp, FollowerPlane fp, List<FollowerPlane> fps) {
+
+        double[] a = {.0, .0};
+        if (computeDistance(lp, fp) <= LA) {
+            double[] tmp = computeAttract(lp, fp);
+            a[0] += tmp[0];
+            a[1] += tmp[1];
+        }
+        if (computeDistance(lp, fp) <= LR1) {
+            double[] tmp = computeRepel1(lp, fp);
+            a[0] += tmp[0];
+            a[1] += tmp[1];
+        }
+        for (FollowerPlane p : fps) {
+            if (p.id != fp.id && computeDistance(fp, p) <= LR2) {
+                double[] tmp = computeRepel2(fp, p);
+                a[0] += tmp[0];
+                a[1] += tmp[1];
+            }
+        }
+
+        if (computeDistance(lp, fp) <= LO) {
+            if (i > 3000) {
+                double[] tmp = computeOrigin(lp, fp);
+                a[0] += tmp[0];
+                a[1] += tmp[1];
+            } else {
+                double[] tmp = computeOrigin(lp, fp);
+                a[0] += tmp[0];
+                a[1] += tmp[1];
+            }
+        }
+
+//        if (computeDistance(lp, fp) <= LO) {
+//            double[] tmp = computeOrigin(lp, fp);
+//            a[0] += tmp[0];
+//            a[1] += tmp[1];
+//        }
+
+        return a;
+    }
+
     static double[] computeAcceleration(FollowerPlane vp, LeaderPlane lp, FollowerPlane fp, List<FollowerPlane> fps) {
 
         double[] a = {.0, .0};
@@ -88,14 +131,14 @@ public class InnerController {
             a[0] += tmp[0];
             a[1] += tmp[1];
         }
-        if (computeDistance(lp, fp) <= LR) {
-            double[] tmp = computeRepel(lp, fp);
+        if (computeDistance(lp, fp) <= LR2) {
+            double[] tmp = computeRepel1(lp, fp);
             a[0] += tmp[0];
             a[1] += tmp[1];
         }
         for (FollowerPlane p : fps) {
-            if (p.id != fp.id && computeDistance(fp, p) <= LR) {
-                double[] tmp = computeRepel(fp, p);
+            if (p.id != fp.id && computeDistance(fp, p) <= LR2) {
+                double[] tmp = computeRepel1(fp, p);
                 a[0] += tmp[0];
                 a[1] += tmp[1];
             }
@@ -109,11 +152,12 @@ public class InnerController {
         return a;
     }
 
-    private static double[] computeAttract(FollowerPlane vp, FollowerPlane fp) {
+    private static double[] computeAttract(Plane vp, FollowerPlane fp) {
 
         double distance = computeDistance(vp, fp);
         if (distance < 0.000000001) return new double[]{.0, .0};
-        double force = (Constants.CA/(double)LA)*Math.exp(1*distance/(double)LA);
+//        double force = (Constants.CA/(double)LA)*Math.exp(1*distance/(double)LA);
+        double force = Constants.CA*Math.pow(distance, 2);
         double sin = (vp.y-fp.y)/distance;
         double cos = (vp.x-fp.x)/distance;
         double a0 = force/Constants.MASS;
@@ -123,12 +167,36 @@ public class InnerController {
         return a;
     }
 
-    private static double[] computeRepel(Plane lp, Plane fp) {
+    private static double[] computeRepel1(Plane lp, Plane fp) {
 
         double distance = computeDistance(lp, fp);
-        double force = (Constants.CR/LR)*Math.exp(-1*distance/LR);
+//        double force = (Constants.CR/LR1)*Math.exp(-1*distance/LR1);
+        double force = Constants.CR*Math.pow(1/distance, 2);
         double cos = (fp.x-lp.x)/distance;
         double sin = (fp.y-lp.y)/distance;
+        double a = force/Constants.MASS;
+        return new double[]{a*cos, a*sin};
+    }
+
+    private static double[] computeRepel2(Plane lp, Plane fp) {
+
+        double distance = computeDistance(lp, fp);
+//        double force = (Constants.CR/LR2)*Math.exp(-1*distance/LR2);
+        double force = Constants.CR*Math.pow(1/distance, 2);
+        double cos = (fp.x-lp.x)/distance;
+        double sin = (fp.y-lp.y)/distance;
+        double a = force/Constants.MASS;
+        return new double[]{a*cos, a*sin};
+    }
+
+    private static double[] computeOrigin2(LeaderPlane lp, FollowerPlane fp) {
+
+        double velocity = computeVelocity(lp, fp);
+//        double force = (0.05*Constants.CO/(double)LO)*Math.exp(1*velocity/(double)LO);
+        double force = Constants.CO*Math.pow(velocity, 2);
+        if (velocity < 0.000000001) return new double[]{.0, .0};
+        double cos = (lp.vx-fp.vx)/velocity;
+        double sin = (lp.vy-fp.vy)/velocity;
         double a = force/Constants.MASS;
         return new double[]{a*cos, a*sin};
     }
@@ -136,7 +204,8 @@ public class InnerController {
     private static double[] computeOrigin(LeaderPlane lp, FollowerPlane fp) {
 
         double velocity = computeVelocity(lp, fp);
-        double force = (Constants.CO/(double)LO)*Math.exp(1*velocity/(double)LO);
+//        double force = (Constants.CO/(double)LO)*Math.exp(1*velocity/(double)LO);
+        double force = Constants.CO*Math.pow(velocity, 2);
         if (velocity < 0.000000001) return new double[]{.0, .0};
         double cos = (lp.vx-fp.vx)/velocity;
         double sin = (lp.vy-fp.vy)/velocity;
