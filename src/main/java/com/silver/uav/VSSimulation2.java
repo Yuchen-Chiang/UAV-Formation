@@ -37,18 +37,18 @@ public class VSSimulation2 {
             leader.x = leader.x1;
             leader.y = leader.y1;
             double v = 10;
-            if (i < 25*sample) {
+            if (i < 125*sample) {
                 theta = 0;
-            } else if (i >= 25*sample && i < 55*sample){
-                theta += Math.PI/3600;
-            } else if (i >= 55*sample && i < 85*sample) {
-                theta -= Math.PI/3600;
-            } else if (i >= 85*sample && i < 90*sample) {
+            } else if (i >= 125*sample && i < 155*sample){
+                theta += Math.PI/(180*sample);
+            } else if (i >= 155*sample && i < 185*sample) {
+                theta -= Math.PI/(180*sample);
+            } else if (i >= 185*sample && i < 190*sample) {
                 theta = 0;
-            } else if (i >=90*sample && i < 120*sample) {
-                theta -= Math.PI/3600;
-            } else if (i >= 120*sample && i < 150*sample) {
-                theta += Math.PI/3600;
+            } else if (i >=190*sample && i < 220*sample) {
+                theta -= Math.PI/(180*sample);
+            } else if (i >= 220*sample && i < 250*sample) {
+                theta += Math.PI/(180*sample);
             } else {
                 theta = 0;
             }
@@ -123,25 +123,33 @@ public class VSSimulation2 {
         Plane p0 = pl.get(0);
         Plane p1 = pl.get(1);
         Plane p2 = pl.get(2);
+        Plane p3 = pl.get(3);
+        Plane p4 = pl.get(4);
 
         double dist01 = Math.sqrt(Math.pow(p1.x-p0.x, 2)+Math.pow(p1.y-p0.y, 2));
-        double dist02 = Math.sqrt(Math.pow(p2.x-p0.x, 2)+Math.pow(p2.y-p0.y, 2));
+        double dist04 = Math.sqrt(Math.pow(p4.x-p0.x, 2)+Math.pow(p4.y-p0.y, 2));
         double dist12 = Math.sqrt(Math.pow(p2.x-p1.x, 2)+Math.pow(p2.y-p1.y, 2));
+        double dist13 = Math.sqrt(Math.pow(p3.x-p1.x, 2)+Math.pow(p3.y-p1.y, 2));
 
-        try (RandomAccessFile file1 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_dist_01", "rw");
-             RandomAccessFile file2 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_dist_02", "rw");
-             RandomAccessFile file3 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_dist_12", "rw")) {
+        try (RandomAccessFile file1 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_outer\\vs_dist_01", "rw");
+             RandomAccessFile file4 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_outer\\vs_dist_04", "rw");
+             RandomAccessFile file3 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_outer\\vs_dist_12", "rw");
+             RandomAccessFile file5 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_outer\\vs_dist_13", "rw")) {
             long l1 = file1.length();
             file1.seek(l1);
             file1.writeBytes(dist01+" ");
 
-            long l2 = file2.length();
-            file2.seek(l2);
-            file2.writeBytes(dist02+" ");
+            long l4 = file4.length();
+            file4.seek(l4);
+            file4.writeBytes(dist04+" ");
 
             long l3 = file3.length();
             file3.seek(l3);
             file3.writeBytes(dist12+" ");
+
+            long l5 = file5.length();
+            file5.seek(l5);
+            file5.writeBytes(dist13+" ");
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -151,8 +159,8 @@ public class VSSimulation2 {
 
         for (int i = 0; i < pl.size(); i++) {
             Plane p = pl.get(i);
-            try (RandomAccessFile fileX = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_"+i+"_x", "rw");
-                 RandomAccessFile fileY = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_"+i+"_y", "rw")) {
+            try (RandomAccessFile fileX = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_outer\\vs_"+i+"_x", "rw");
+                 RandomAccessFile fileY = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\vs_outer\\vs_"+i+"_y", "rw")) {
                 long lX = fileX.length();
                 fileX.seek(lX);
                 fileX.writeBytes(p.x+" ");

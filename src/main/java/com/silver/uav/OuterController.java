@@ -56,25 +56,33 @@ class OuterController {
         LeaderPlane p0 = lps.get(0);
         LeaderPlane p1 = lps.get(1);
         LeaderPlane p2 = lps.get(2);
+        LeaderPlane p3 = lps.get(3);
+        LeaderPlane p4 = lps.get(4);
 
         double dist01 = distance(p0, p1);
-        double dist02 = distance(p0, p2);
         double dist12 = distance(p1, p2);
+        double dist13 = distance(p1, p3);
+        double dist04 = distance(p0, p4);
 
-        try (RandomAccessFile file1 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer_dist_01", "rw");
-             RandomAccessFile file2 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer_dist_02", "rw");
-             RandomAccessFile file3 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer_dist_12", "rw")) {
+        try (RandomAccessFile file1 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer\\outer_dist_01", "rw");
+             RandomAccessFile file4 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer\\outer_dist_04", "rw");
+             RandomAccessFile file3 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer\\outer_dist_12", "rw");
+             RandomAccessFile file5 = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer\\outer_dist_13", "rw")) {
             long l1 = file1.length();
             file1.seek(l1);
             file1.writeBytes(dist01+" ");
 
-            long l2 = file2.length();
-            file2.seek(l2);
-            file2.writeBytes(dist02+" ");
+            long l4 = file4.length();
+            file4.seek(l4);
+            file4.writeBytes(dist04+" ");
 
             long l3 = file3.length();
             file3.seek(l3);
             file3.writeBytes(dist12+" ");
+
+            long l5 = file5.length();
+            file5.seek(l5);
+            file5.writeBytes(dist13+" ");
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -85,8 +93,8 @@ class OuterController {
 
         for (int i = 0; i < lps.size(); i++) {
             Plane p = lps.get(i);
-            try (RandomAccessFile fileX = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer_"+i+"_x", "rw");
-                 RandomAccessFile fileY = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer_"+i+"_y", "rw")) {
+            try (RandomAccessFile fileX = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer\\outer_"+i+"_x", "rw");
+                 RandomAccessFile fileY = new RandomAccessFile("C:\\Users\\Yuche\\Documents\\MATLAB\\outer\\outer_"+i+"_y", "rw")) {
                 long lX = fileX.length();
                 fileX.seek(lX);
                 fileX.writeBytes(p.x+" ");
